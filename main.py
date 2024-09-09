@@ -1,8 +1,6 @@
 import pandas as pd
 import statsmodels.api as sm
-import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 
 # Define the path to your Excel file
 file_path = 'Regression data for analsysis .xlsx'  # Make sure this matches the exact file name
@@ -41,31 +39,49 @@ def run_regression(metric, data):
 
     # Run the regression
     model = sm.OLS(Y, X).fit()
-    print(f'Regression results for {metric}:')
-    print(model.summary())
 
-    # Save regression summary as a PNG
-    save_summary_as_png(model, metric)
-
-    return model
+    # Save regression summary as HTML table
+    save_summary_as_html_table(model, metric)
 
 
-# Function to save regression summary as a PNG
-def save_summary_as_png(model, metric):
-    # Convert summary to string
-    summary_str = model.summary().as_text()
+# Function to save regression summary as an HTML table
+def save_summary_as_html_table(model, metric):
+    summary = model.summary()
 
-    # Create a figure
-    fig, ax = plt.subplots(figsize=(10, 6))
-    fig.subplots_adjust(left=0.2, right=0.8, top=0.8, bottom=0.2)
-    ax.axis('off')  # No axes, text-only figure
+    # Extract regression results as tables
+    coefficients_table = summary.tables[1]  # Coefficients table
+    other_stats_table = summary.tables[0]  # Other statistics
 
-    # Display the summary text
-    ax.text(0.01, 0.99, summary_str, transform=ax.transAxes, fontsize=10, verticalalignment='top')
+    # Prepare HTML output
+    html_text = f"<h2>Regression Results for {metric}</h2>\n"
 
-    # Save the figure as a PNG file
-    plt.savefig(f'{metric}_regression_summary.png', bbox_inches='tight', dpi=300)
-    plt.close()
+    # Coefficients table
+    html_text += "<h3>Coefficients Table:</h3>\n"
+    html_text += convert_table_to_html(coefficients_table)
+
+    # Other statistics (like R-squared, F-statistic, etc.)
+    html_text += "<h3>Other Statistics:</h3>\n"
+    html_text += convert_table_to_html(other_stats_table)
+
+    # Save the HTML output to a file
+    with open(f'{metric}_regression_summary.html', 'w') as f:
+        f.write(html_text)
+
+
+# Function to convert statsmodels table into well-formatted HTML
+def convert_table_to_html(table):
+    html = "<table border='1' cellpadding='4' cellspacing='0' style='border-collapse: collapse;'>\n"
+
+    # Split the table into rows
+    rows = table.as_html().split('<tr>')[1:]  # Skip the first split item, which is before the first <tr>
+
+    # Process each row
+    for row in rows:
+        row = row.replace('</td>', '</td>').replace('<th>', '<th style="text-align: left;">').strip()
+        html += f"<tr>{row}</tr>\n"
+
+    html += "</table>\n"
+    return html
 
 
 # Run regression for all financial metrics
