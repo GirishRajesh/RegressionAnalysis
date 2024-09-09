@@ -8,7 +8,7 @@ file_path = 'Regression data for analsysis .xlsx'
 df = pd.read_excel(file_path)
 
 # Filter the data for low-growth sector
-df_high_growth = df[df['Growth sector'] == 'Low'].copy()  # Use .copy() to avoid SettingWithCopyWarning
+df_high_growth = df[df['Growth sector'] == 'High'].copy()  # Use .copy() to avoid SettingWithCopyWarning
 
 # Create the interaction term (no need to multiply by anything because it's a single variable)
 df_high_growth.loc[:, 'Interaction'] = df_high_growth['GDP GROWTH YOY%']  # Use .loc to avoid SettingWithCopyWarning
@@ -43,7 +43,7 @@ def run_regression(metric, data):
     model = sm.OLS(Y, X).fit()
 
     # Print the regression summary
-    print(f'Regression results for {metric} (low Growth Sector):')
+    print(f'Regression results for {metric} (high Growth Sector):')
     print(model.summary())
 
 
